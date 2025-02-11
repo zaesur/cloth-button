@@ -8,17 +8,18 @@ const TEXTURE_PATH = "/cloth-button/text.png";
 const WIDTH = 2;
 const HEIGHT = 1;
 const ASPECT_RATIO = WIDTH / HEIGHT;
-const WIDTH_SEGMENTS = 10;
+const DETAIL = 7;
+const WIDTH_SEGMENTS = DETAIL;
 const HEIGHT_SEGMENTS = Math.floor(WIDTH_SEGMENTS * ASPECT_RATIO);
 const RELAX_FACTOR = 1.1;
 const HORIZONTAL_VERTEX_DISTANCE = (RELAX_FACTOR * WIDTH) / WIDTH_SEGMENTS;
 const VERTICAL_VERTEX_DISTANCE = (RELAX_FACTOR * HEIGHT) / HEIGHT_SEGMENTS;
 const MASS = 1;
-const PRE_ITERATIONS = 0;
+const PRE_ITERATIONS = 200;
 
 const canvas = document.getElementById("canvas")!;
 
-const gravity = { x: 0, y: 0, z: 10 };
+const gravity = { x: 0, y: 0, z: 70 };
 const world = new RAPIER.World(gravity);
 
 const scene = new THREE.Scene();
@@ -121,6 +122,9 @@ function createBodies() {
 
       const body = world.createRigidBody(bodyDesc);
       bodies.push(body);
+
+      const colliderDesc = RAPIER.ColliderDesc.ball(0.001);
+      world.createCollider(colliderDesc, body);
     }
   }
 
@@ -173,3 +177,14 @@ async function loadTexture(url: string) {
     loader.load(url, (data) => resolve(data), undefined, reject);
   });
 }
+
+const colliderDesc = RAPIER.ColliderDesc.ball(1).setTranslation(0, 0, 10);
+const mouseCollider = world.createCollider(colliderDesc);
+
+canvas.addEventListener("mousemove", (event) => {
+  const mousePosition = { x: 0, y: 0 };
+  mousePosition.x = (event.clientX / canvas.clientWidth) * 2 - 1;
+  mousePosition.y = -(event.clientY / canvas.clientHeight) * 2 + 1;
+
+  mouseCollider.setTranslation({ ...mousePosition, z: 1.15 });
+});
