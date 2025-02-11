@@ -19,9 +19,9 @@ const camera = new THREE.PerspectiveCamera(
 );
 const plane = createPlane();
 const bodies = createBodies();
-const joints = createJoints();
+createJoints();
 
-const background = await loadEnvironment("rosendal_plains_1_2k.exr");
+const background = await loadEnvironment("/cloth-button/rosendal_plains_1_2k.exr");
 background.mapping = THREE.EquirectangularReflectionMapping;
 scene.background = new THREE.Color("grey");
 scene.environment = background;
