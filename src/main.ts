@@ -2,13 +2,13 @@ import * as THREE from "three";
 import RAPIER from "@dimforge/rapier3d";
 import { EXRLoader } from "three/examples/jsm/Addons.js";
 
-const SEGMENTS = 10;
-const MASS = 0.5;
+const SEGMENTS = 50;
+const MASS = 1;
 const VERTEX_DISTANCE = 1 / SEGMENTS;
 
 const canvas = document.getElementById("canvas")!;
 
-const gravity = { x: 0, y: 0, z: 10 };
+const gravity = { x: 0, y: 0, z: 30 };
 const world = new RAPIER.World(gravity);
 
 const scene = new THREE.Scene();
@@ -17,7 +17,7 @@ const camera = new THREE.PerspectiveCamera(
   45,
   canvas.clientWidth / canvas.clientHeight
 );
-const plane = createPlane();
+const plane = await createPlane();
 const bodies = createBodies();
 createJoints();
 
@@ -58,11 +58,13 @@ function render() {
   renderer.render(scene, camera);
 }
 
-function createPlane() {
+async function createPlane() {
+  const map = await loadTexture("/cloth-button/text.png");
   const material = new THREE.MeshStandardMaterial({
     wireframe: false,
     metalness: 0.1,
     roughness: 0.1,
+    map,
   });
   const geometry = new THREE.PlaneGeometry(1, 1, SEGMENTS, SEGMENTS);
   const mesh = new THREE.Mesh(geometry, material);
@@ -102,10 +104,8 @@ function createJoints() {
 
   const connect = (bodyA: RAPIER.RigidBody, bodyB: RAPIER.RigidBody) => {
     const origin = { x: 0, y: 0, z: 0 };
-    const jointParams = RAPIER.JointData.spring(
+    const jointParams = RAPIER.JointData.rope(
       VERTEX_DISTANCE,
-      100,
-      10,
       origin,
       origin
     );
@@ -131,4 +131,11 @@ async function loadEnvironment(url: string) {
   return new Promise<THREE.DataTexture>((resolve, reject) => {
     loader.load(url, (data) => resolve(data), undefined, reject);
   });
+}
+
+async function loadTexture(url: string) {
+  const loader = new THREE.TextureLoader();
+  return new Promise<THREE.Texture> ((resolve, reject) => {
+    loader.load(url, (data) => resolve(data), undefined, reject);
+  })
 }
